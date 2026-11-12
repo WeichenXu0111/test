@@ -25,7 +25,7 @@ import os
 from datetime import datetime
 
 import sys
-sys.path.append('gaussian-splatting')
+sys.path.append('3rdparty/gaussian-splatting')
 from scene.gaussian_model import GaussianModel
 
 import time

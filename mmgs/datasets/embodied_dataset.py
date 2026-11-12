@@ -39,7 +39,7 @@ from sklearn.neighbors import NearestCentroid
 from sklearn.metrics.pairwise import euclidean_distances
 
 import sys
-sys.path.append('gaussian-splatting')
+sys.path.append('3rdparty/gaussian-splatting')
 from scene.gaussian_model import GaussianModel
 from math import atan
 

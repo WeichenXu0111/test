@@ -154,7 +154,7 @@ def find_far_points(xyzs, selected_points, thres=0.05):
 
 
 import sys
-sys.path.append('gaussian-splatting')
+sys.path.append('3rdparty/gaussian-splatting')
 from scene.gaussian_model import GaussianModel
 
 def apply_mask_gaussian(gaussian, mask):

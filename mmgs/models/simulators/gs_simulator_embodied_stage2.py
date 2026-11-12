@@ -25,7 +25,7 @@ import os
 from datetime import datetime
 
 import sys
-sys.path.append('gaussian-splatting')
+sys.path.append('3rdparty/gaussian-splatting')
 from scene.gaussian_model import GaussianModel
 
 import time
@@ -228,7 +228,11 @@ class GsSimulatorEmbodiedS2(BaseSimulator):
             for pred_data_file in pred_data_files:
                 if not pred_data_file.endswith('.pth'):
                     continue
-                pred_data = torch.load(os.path.join(scene_init_dir, pred_data_file))
+                # pred_data = torch.load(os.path.join(scene_init_dir, pred_data_file))
+                pred_data = torch.load(
+                    os.path.join(scene_init_dir, pred_data_file),
+                    map_location=torch.device("cuda", torch.cuda.current_device()),
+                )
                 pred_pos = pred_data['pred_pos']
                 pred_cov = pred_data['pred_cov']
                 pos_leaf = pred_pos.detach().clone().requires_grad_(True)

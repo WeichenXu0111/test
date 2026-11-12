@@ -7,7 +7,7 @@ from diff_gaussian_rasterization import (
 )
 
 import sys
-sys.path.append('gaussian-splatting')
+sys.path.append('3rdparty/gaussian-splatting')
 from scene.gaussian_model import GaussianModel
 from utils.sh_utils import eval_sh
 

@@ -23,9 +23,9 @@ dist/
 htmlcov/
 
 # Runtime outputs
-work_dirs/
+#work_dirs/
 outcomes/
-outputs/
+#outputs/
 runs/
 wandb/
 tensorboard/
@@ -58,3 +58,7 @@ gaussian-splatting/
 rjob_scripts/
 visualization/
 test/
+download/
+mmcv_build/
+*copy.md
+3rdparty/

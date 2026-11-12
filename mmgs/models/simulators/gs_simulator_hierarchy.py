@@ -23,7 +23,7 @@ from mmgs.utils.physdreamer_utils import apply_mask_gaussian
 import os
 
 import sys
-sys.path.append('gaussian-splatting')
+sys.path.append('3rdparty/gaussian-splatting')
 from scene.gaussian_model import GaussianModel
 
 import time
