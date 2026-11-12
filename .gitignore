@@ -31,17 +31,14 @@ wandb/
 tensorboard/
 
 # Logs and local keepalive/debug files
-*.log
-*.log.json
+
 gpu*_keepalive.log
 
 # Large local assets/checkpoints should live outside git.
 data/
 ckpt/
 checkpoints/
-*.pth
-*.pt
-*.ckpt
+
 
 # Local third-party/build scratch directories
 third_party/

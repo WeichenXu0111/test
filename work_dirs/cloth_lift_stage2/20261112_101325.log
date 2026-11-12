@@ -1,0 +1,542 @@
+2026-11-12 10:13:25,479 - mmgd - INFO - Environment info:
+------------------------------------------------------------
+sys.platform: linux
+Python: 3.10.22 (main, Oct 29 2026, 20:33:25) [GCC 14.3.0]
+CUDA available: True
+GPU 0,1,2,3: NVIDIA H100 80GB HBM3
+CUDA_HOME: /usr/local/cuda
+NVCC: Cuda compilation tools, release 11.8, V11.8.89
+GCC: gcc (Ubuntu 11.4.0-1ubuntu1~22.04) 11.4.0
+PyTorch: 2.0.0
+PyTorch compiling details: PyTorch built with:
+  - GCC 9.3
+  - C++ Version: 201703
+  - Intel(R) oneAPI Math Kernel Library Version 2023.1-Product Build 20230303 for Intel(R) 64 architecture applications
+  - Intel(R) MKL-DNN v2.7.3 (Git Hash 6dbeffbae1f23cbbeae17adb7b5b13f1f37c080e)
+  - OpenMP 201511 (a.k.a. OpenMP 4.5)
+  - LAPACK is enabled (usually provided by MKL)
+  - NNPACK is enabled
+  - CPU capability usage: AVX2
+  - CUDA Runtime 11.8
+  - NVCC architecture flags: -gencode;arch=compute_37,code=sm_37;-gencode;arch=compute_50,code=sm_50;-gencode;arch=compute_60,code=sm_60;-gencode;arch=compute_61,code=sm_61;-gencode;arch=compute_70,code=sm_70;-gencode;arch=compute_75,code=sm_75;-gencode;arch=compute_80,code=sm_80;-gencode;arch=compute_86,code=sm_86;-gencode;arch=compute_90,code=sm_90;-gencode;arch=compute_37,code=compute_37
+  - CuDNN 8.7
+  - Magma 2.6.1
+  - Build settings: BLAS_INFO=mkl, BUILD_TYPE=Release, CUDA_VERSION=11.8, CUDNN_VERSION=8.7.0, CXX_COMPILER=/opt/rh/devtoolset-9/root/usr/bin/c++, CXX_FLAGS= -D_GLIBCXX_USE_CXX11_ABI=0 -fabi-version=11 -Wno-deprecated -fvisibility-inlines-hidden -DUSE_PTHREADPOOL -DNDEBUG -DUSE_KINETO -DLIBKINETO_NOROCTRACER -DUSE_FBGEMM -DUSE_QNNPACK -DUSE_PYTORCH_QNNPACK -DUSE_XNNPACK -DSYMBOLICATE_MOBILE_DEBUG_HANDLE -O2 -fPIC -Wall -Wextra -Werror=return-type -Werror=non-virtual-dtor -Werror=bool-operation -Wnarrowing -Wno-missing-field-initializers -Wno-type-limits -Wno-array-bounds -Wno-unknown-pragmas -Wunused-local-typedefs -Wno-unused-parameter -Wno-unused-function -Wno-unused-result -Wno-strict-overflow -Wno-strict-aliasing -Wno-error=deprecated-declarations -Wno-stringop-overflow -Wno-psabi -Wno-error=pedantic -Wno-error=redundant-decls -Wno-error=old-style-cast -fdiagnostics-color=always -faligned-new -Wno-unused-but-set-variable -Wno-maybe-uninitialized -fno-math-errno -fno-trapping-math -Werror=format -Werror=cast-function-type -Wno-stringop-overflow, LAPACK_INFO=mkl, PERF_WITH_AVX=1, PERF_WITH_AVX2=1, PERF_WITH_AVX512=1, TORCH_DISABLE_GPU_ASSERTS=ON, TORCH_VERSION=2.0.0, USE_CUDA=ON, USE_CUDNN=ON, USE_EXCEPTION_PTR=1, USE_GFLAGS=OFF, USE_GLOG=OFF, USE_MKL=ON, USE_MKLDNN=ON, USE_MPI=OFF, USE_NCCL=ON, USE_NNPACK=ON, USE_OPENMP=ON, USE_ROCM=OFF, 
+
+TorchVision: 0.15.0
+OpenCV: 4.9.0
+MMCV: 1.7.2
+MMCV Compiler: GCC 11.4
+MMCV CUDA Compiler: 11.8
+MMGraphDynamics: 0.1.0+8e8772a
+------------------------------------------------------------
+
+2026-11-12 10:13:25,479 - mmgd - INFO - Distributed training: True
+2026-11-12 10:13:27,804 - mmgd - INFO - Config:
+model = dict(
+    type='GsSimulatorEmbodiedS2',
+    cluster_cfg=dict(
+        carnations=[dict(downsample_rate=0.01),
+                    dict(downsample_rate=0.01)],
+        left_lift_1=[dict(downsample_rate=0.02),
+                     dict(downsample_rate=0.2)]),
+    processor_cfg=[
+        dict(
+            type='GsHieEmbodiedDGLProcessor',
+            anchor_prefix='anchor_',
+            radius=[0.03, 0.2, 0.5],
+            group_cfg=dict(
+                max_radius=None,
+                min_radius=0.0,
+                sample_num=16,
+                use_xyz=True,
+                normalize_xyz=False,
+                return_grouped_xyz=False,
+                return_grouped_idx=True,
+                return_unique_cnt=False))
+    ],
+    accumulate_gradient=False,
+    dt=0.06666666666666667,
+    backbone=dict(
+        type='MeshGraphNetHieEmbodied',
+        attr_dim=5,
+        state_dim=6,
+        position_dim=3,
+        num_frames=2,
+        embed_dims=128,
+        num_encoder_layers=16,
+        dropout=0.0,
+        eps=1e-07,
+        num_fcs=3,
+        act_cfg=dict(type='SiLU', inplace=True),
+        norm_cfg=dict(type='LN'),
+        pre_norm=True,
+        norm_acc_steps=None,
+        edge_mode='ratio',
+        edge_theta=True,
+        fix_bug=True),
+    decode_head=dict(
+        type='AccDecoder',
+        in_channels=128,
+        out_channels=11,
+        add_residual=False,
+        init_quant=1.0,
+        loss_decode=[
+            dict(
+                type='MSELoss',
+                reduction='sum',
+                loss_weight=1.0,
+                loss_name='loss_mse_momentum'),
+            dict(
+                type='SSIMLoss',
+                reduction='sum',
+                kernel_size=5,
+                loss_weight=0.1,
+                loss_name='loss_ssim_render'),
+            dict(
+                type='L2Loss',
+                reduction='sum',
+                loss_weight=0.9,
+                loss_name='loss_l2_render'),
+            dict(
+                type='MSELoss',
+                reduction='sum',
+                loss_weight=1.0,
+                loss_name='loss_mse_static'),
+            dict(
+                type='SpatialLoss',
+                reduction='sum',
+                loss_weight=1.0,
+                loss_name='loss_spatial'),
+            dict(
+                type='L2Loss',
+                reduction='sum',
+                loss_weight=0.9,
+                loss_name='loss_l2_bounding'),
+            dict(
+                type='SSIMLoss',
+                reduction='sum',
+                kernel_size=5,
+                loss_weight=0.1,
+                loss_name='loss_ssim_bounding')
+        ],
+        accuracy=[
+            dict(
+                type='L2Accuracy', reduction='mean', acc_name='acc_l2_render'),
+            dict(
+                type='L1Accuracy', reduction='mean', acc_name='acc_l1_render'),
+            dict(
+                type='SSIMAccuracy',
+                reduction='mean',
+                acc_name='acc_ssim_render'),
+            dict(
+                type='PSNRAccuracy',
+                reduction='mean',
+                acc_name='acc_psnr_render')
+        ]),
+    gs_scene=[
+        dict(
+            name='left_lift_1',
+            model_path=
+            'data_soma_sample/cloth_lift/left_lift_1/pi3/gs/point_cloud/iteration_10000/point_cloud.ply',
+            sh_degree=0,
+            num_seq=1,
+            attr_name='rope')
+    ],
+    forward_last_layer=False,
+    share_weight=True,
+    opt_sim=True,
+    opt_vel=True,
+    checkpoint_rollout=20,
+    selfsup_loss=False,
+    pred_vel=True,
+    use_rotation=False,
+    fix_bug=True,
+    frame_gap=10,
+    test_rollout_mode='segmented',
+    flag_save_gaussian=False,
+    flag_update_gaussian=True,
+    flag_update_gaussian_train=False,
+    data_dir='data_soma_sample/cloth_lift/',
+    controller_cfg=dict(
+        left_lift_1=[dict(downsample_rate=0.5),
+                     dict(downsample_rate=0.5)]),
+    static_loss=False,
+    avg_loss=True,
+    render_mov_only=True,
+    train_cfg=dict(
+        by_epoch=True,
+        step_increase_interval=1,
+        step_increase_magnitude=3,
+        step_initial=-42,
+        max_rollout_step=1000),
+    test_cfg=dict(
+        by_epoch=True,
+        step_increase_interval=1,
+        step_increase_magnitude=3,
+        step_initial=-42,
+        max_rollout_step=1000))
+env_cfg = dict(
+    data_dir='',
+    sub_video_dir='video_images',
+    sub_img_dir='images',
+    cam_transform_fn=None,
+    scene_list=['mothorchids'],
+    use_random_background=dict(mothorchids_v2=False),
+    const_white_bg=dict(mothorchids_v2=True),
+    resolution=[960, 540],
+    scale_x_angle=1.0,
+    load_imgs=False,
+    volume_scalar=dict(mothorchids_v2=512),
+    gravity=[0, 0, -9.8],
+    rot_est=dict(mothorchids=[-0.912, 0.007, 0.015, 0.411]),
+    max_cam_num=6,
+    pad_cam=False,
+    max_cam_total=180,
+    max_frame=-1,
+    start_frame=0,
+    cluster_cfg=dict(
+        mothorchids=[dict(downsample_rate=0.01),
+                     dict(downsample_rate=0.01)]),
+    dt=0.03333333333333333,
+    real_dt=dict(mothorchids=0.033366700033366704, duck=0.02),
+    llffhold=0)
+dataset_type = 'EmbodiedDataset'
+data = dict(
+    samples_per_gpu=1,
+    workers_per_gpu=0,
+    train=dict(
+        times=40,
+        type='RepeatDataset',
+        dataset=dict(
+            type='EmbodiedDataset',
+            phase='all',
+            env_cfg=dict(
+                data_dir='data_soma_sample/cloth_lift/',
+                sub_video_dir='color',
+                sub_img_dir='color',
+                cam_transform_fn=None,
+                scene_list=['left_lift_1'],
+                use_random_background=dict(
+                    mothorchids_v2=False, left_lift_1=False),
+                const_white_bg=dict(mothorchids_v2=True, left_lift_1=False),
+                resolution=[960, 540],
+                scale_x_angle=1.0,
+                load_imgs=False,
+                volume_scalar=dict(mothorchids_v2=512, left_lift_1=512),
+                gravity=[0, 0, -9.8],
+                rot_est=dict(
+                    mothorchids=[-0.912, 0.007, 0.015, 0.411],
+                    left_lift_1=[
+                        -0.7665673850964486, 0.3083841731272888, 0.0,
+                        0.5632704908576266
+                    ]),
+                max_cam_num=3,
+                pad_cam=False,
+                max_cam_total=6,
+                max_frame=1001,
+                start_frame=0,
+                cluster_cfg=dict(
+                    mothorchids=[
+                        dict(downsample_rate=0.01),
+                        dict(downsample_rate=0.01)
+                    ],
+                    left_lift_1=[
+                        dict(downsample_rate=0.02),
+                        dict(downsample_rate=0.2)
+                    ]),
+                dt=0.03333333333333333,
+                real_dt=dict(
+                    mothorchids=0.033366700033366704,
+                    duck=0.02,
+                    left_lift_1=0.06666666666666667),
+                llffhold=0,
+                split_list=dict(
+                    left_lift_1=[[0, 13], [10, 23], [20, 33], [30, 43],
+                                 [40, 53], [50, 63], [60, 73], [70, 83],
+                                 [80, 93], [90, 103], [100, 113], [110, 123],
+                                 [120, 133], [130, 143], [140, 150]]),
+                prompt_dict=dict(
+                    object=['cloth'], obstacle=['hand', 'robotic arm']),
+                aligned_scene=None,
+                frame_gap=1,
+                tracking_pcd='track_process_data.pkl',
+                cluster_type='dis_split',
+                controller_cfg=dict(left_lift_1=[
+                    dict(downsample_rate=0.5),
+                    dict(downsample_rate=0.5)
+                ]),
+                max_seq=1))),
+    val=dict(
+        type='EmbodiedDataset',
+        phase='all',
+        env_cfg=dict(
+            data_dir='data_soma_sample/cloth_lift/',
+            sub_video_dir='color',
+            sub_img_dir='color',
+            cam_transform_fn=None,
+            scene_list=['left_lift_1'],
+            use_random_background=dict(
+                mothorchids_v2=False, left_lift_1=False),
+            const_white_bg=dict(mothorchids_v2=True, left_lift_1=False),
+            resolution=[960, 540],
+            scale_x_angle=1.0,
+            load_imgs=False,
+            volume_scalar=dict(mothorchids_v2=512, left_lift_1=512),
+            gravity=[0, 0, -9.8],
+            rot_est=dict(
+                mothorchids=[-0.912, 0.007, 0.015, 0.411],
+                left_lift_1=[
+                    -0.7665673850964486, 0.3083841731272888, 0.0,
+                    0.5632704908576266
+                ]),
+            max_cam_num=3,
+            pad_cam=False,
+            max_cam_total=6,
+            max_frame=1003,
+            start_frame=0,
+            cluster_cfg=dict(
+                mothorchids=[
+                    dict(downsample_rate=0.01),
+                    dict(downsample_rate=0.01)
+                ],
+                left_lift_1=[
+                    dict(downsample_rate=0.02),
+                    dict(downsample_rate=0.2)
+                ]),
+            dt=0.03333333333333333,
+            real_dt=dict(
+                mothorchids=0.033366700033366704,
+                duck=0.02,
+                left_lift_1=0.06666666666666667),
+            llffhold=0,
+            split_list=dict(
+                left_lift_1=[[0, 13], [10, 23], [20, 33], [30, 43], [40, 53],
+                             [50, 63], [60, 73], [70, 83], [80, 93], [90, 103],
+                             [100, 113], [110, 123], [120, 133], [130, 143],
+                             [140, 150]]),
+            prompt_dict=dict(
+                object=['cloth'], obstacle=['hand', 'robotic arm']),
+            aligned_scene=None,
+            frame_gap=1,
+            tracking_pcd='track_process_data.pkl',
+            cluster_type='dis_split',
+            controller_cfg=dict(left_lift_1=[
+                dict(downsample_rate=0.5),
+                dict(downsample_rate=0.5)
+            ]),
+            eval_start_frame=-1,
+            max_seq=1)),
+    test=dict(
+        type='EmbodiedDataset',
+        phase='all',
+        env_cfg=dict(
+            data_dir='data_soma_sample/cloth_lift/',
+            sub_video_dir='color',
+            sub_img_dir='color',
+            cam_transform_fn=None,
+            scene_list=['left_lift_1'],
+            use_random_background=dict(
+                mothorchids_v2=False, left_lift_1=False),
+            const_white_bg=dict(mothorchids_v2=True, left_lift_1=False),
+            resolution=[960, 540],
+            scale_x_angle=1.0,
+            load_imgs=False,
+            volume_scalar=dict(mothorchids_v2=512, left_lift_1=512),
+            gravity=[0, 0, -9.8],
+            rot_est=dict(
+                mothorchids=[-0.912, 0.007, 0.015, 0.411],
+                left_lift_1=[
+                    -0.7665673850964486, 0.3083841731272888, 0.0,
+                    0.5632704908576266
+                ]),
+            max_cam_num=3,
+            pad_cam=False,
+            max_cam_total=6,
+            max_frame=1003,
+            start_frame=0,
+            cluster_cfg=dict(
+                mothorchids=[
+                    dict(downsample_rate=0.01),
+                    dict(downsample_rate=0.01)
+                ],
+                left_lift_1=[
+                    dict(downsample_rate=0.02),
+                    dict(downsample_rate=0.2)
+                ]),
+            dt=0.03333333333333333,
+            real_dt=dict(
+                mothorchids=0.033366700033366704,
+                duck=0.02,
+                left_lift_1=0.06666666666666667),
+            llffhold=0,
+            split_list=dict(left_lift_1=[[0, 150]]),
+            prompt_dict=dict(
+                object=['cloth'], obstacle=['hand', 'robotic arm']),
+            aligned_scene=None,
+            frame_gap=1,
+            tracking_pcd='track_process_data.pkl',
+            cluster_type='dis_split',
+            controller_cfg=dict(left_lift_1=[
+                dict(downsample_rate=0.5),
+                dict(downsample_rate=0.5)
+            ]),
+            eval_start_frame=-1,
+            max_seq=1)))
+optimizer = dict(
+    type='Adam', lr=0.0004, betas=(0.9, 0.999), weight_decay=0, amsgrad=False)
+optimizer_config = dict(grad_clip=dict(max_norm=1.0))
+checkpoint_config = dict(interval=1, by_epoch=True, max_keep_ckpts=10000)
+log_config = dict(interval=100, hooks=[dict(type='CusTextLoggerHook')])
+dist_params = dict(backend='nccl')
+log_level = 'INFO'
+load_from = None
+resume_from = 'work_dirs/cloth_lift_stage1/epoch_15.pth'
+workflow = [('train', 1)]
+data_dir = 'data_soma_sample/cloth_lift/'
+epoch_stage1 = 15
+n_gpu = 4
+num_sample = 1
+num_worker = 0
+find_unused_parameters = True
+max_cam_num = 3
+frame_gap = 10
+frame_gap_stage2 = 1
+dt = 0.06666666666666667
+extra_frame_stage2 = 3
+lr_decay_steps = 2
+lr_step_start = 16
+max_epoch = 76
+dataset_times = 40
+render_loss_weight = 1
+by_epoch = True
+step_increase_interval = 1
+step_increase_magnitude = 3
+step_initial = -42
+max_rollout_step = 1000
+test_max_frame = 1003
+test_start_frame = -1
+start_frame = 0
+max_seq = 1
+num_encoder_layers = 16
+edge_theta = True
+selfsup_loss = False
+avg_loss = True
+render_mov_only = True
+sub_video_dir = 'color'
+sub_img_dir = 'color'
+tracking_pcd = 'track_process_data.pkl'
+flag_save_gaussian = False
+flag_update_gaussian = True
+flag_update_gaussian_train = False
+scene_list = ['left_lift_1']
+prompt_dict = dict(object=['cloth'], obstacle=['hand', 'robotic arm'])
+aligned_scene = None
+white_bg = False
+default_rot = [0, 0, 0, 1]
+scene_attr_name = 'rope'
+train_split = [[0, 13], [10, 23], [20, 33], [30, 43], [40, 53], [50, 63],
+               [60, 73], [70, 83], [80, 93], [90, 103], [100, 113], [110, 123],
+               [120, 133], [130, 143], [140, 150]]
+test_split = [[0, 150]]
+cluster_type = 'dis_split'
+default_cluster_scheme = [
+    dict(downsample_rate=0.02),
+    dict(downsample_rate=0.2)
+]
+default_controller_scheme = [
+    dict(downsample_rate=0.5),
+    dict(downsample_rate=0.5)
+]
+default_volume_scalar = 512
+use_random_background = dict(left_lift_1=False)
+const_white_bg = dict(left_lift_1=False)
+rot_est = dict(left_lift_1=[
+    -0.7665673850964486, 0.3083841731272888, 0.0, 0.5632704908576266
+])
+real_dt = dict(left_lift_1=0.06666666666666667)
+gs_scene = [
+    dict(
+        name='left_lift_1',
+        model_path=
+        'data_soma_sample/cloth_lift/left_lift_1/pi3/gs/point_cloud/iteration_10000/point_cloud.ply',
+        sh_degree=0,
+        num_seq=1,
+        attr_name='rope')
+]
+split_list = dict(
+    train=dict(
+        left_lift_1=[[0, 13], [10, 23], [20, 33], [30, 43], [40, 53], [50, 63],
+                     [60, 73], [70, 83], [80, 93], [90, 103], [100, 113],
+                     [110, 123], [120, 133], [130, 143], [140, 150]]),
+    test=dict(left_lift_1=[[0, 150]]))
+cluster_cfg = dict(
+    left_lift_1=[dict(downsample_rate=0.02),
+                 dict(downsample_rate=0.2)])
+controller_cfg = dict(
+    left_lift_1=[dict(downsample_rate=0.5),
+                 dict(downsample_rate=0.5)])
+volume_scalar = dict(left_lift_1=512)
+scene_name = 'left_lift_1'
+fix_bug = True
+use_rotation = False
+pred_vel = True
+llffhold = 0
+lr_config = dict(
+    by_epoch=True, policy='Hood', decay_rate=0.5, decay_steps=2, step_start=14)
+runner = dict(type='EpochRunner', max_epochs=76, max_iters=None)
+evaluation = dict(by_epoch=True, interval=1)
+work_dir = 'work_dirs/cloth_lift_stage2'
+gpu_ids = range(0, 4)
+
+2026-11-12 10:13:28,305 - mmgd - INFO - Model parameters: 2471888
+2026-11-12 10:13:31,400 - mmgd - INFO - load checkpoint from local path: work_dirs/cloth_lift_stage1/epoch_15.pth
+2026-11-12 10:13:31,648 - mmgd - INFO - resumed epoch 15, iter 195
+2026-11-12 10:13:31,650 - mmgd - INFO - Start running, host: root@soma4--05274ce388ae-tgrfgysin2, work_dir: /inspire/hdd/global_user/czxs25110026/laliwang/SoMA/work_dirs/cloth_lift_stage2
+2026-11-12 10:13:31,650 - mmgd - INFO - Hooks will be executed in the following order:
+before_run:
+(VERY_HIGH   ) HoodLrUpdaterHook                  
+(NORMAL      ) CheckpointHook                     
+(VERY_LOW    ) CusTextLoggerHook                  
+ -------------------- 
+before_train_epoch:
+(VERY_HIGH   ) HoodLrUpdaterHook                  
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) CusTextLoggerHook                  
+ -------------------- 
+before_train_iter:
+(VERY_HIGH   ) HoodLrUpdaterHook                  
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_train_iter:
+(ABOVE_NORMAL) DistOptimizerHook                  
+(NORMAL      ) CheckpointHook                     
+(NORMAL      ) DistEvalHook                       
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) CusTextLoggerHook                  
+ -------------------- 
+after_train_epoch:
+(NORMAL      ) CheckpointHook                     
+(NORMAL      ) DistEvalHook                       
+(VERY_LOW    ) CusTextLoggerHook                  
+ -------------------- 
+before_val_epoch:
+(NORMAL      ) DistSamplerSeedHook                
+(LOW         ) IterTimerHook                      
+(VERY_LOW    ) CusTextLoggerHook                  
+ -------------------- 
+before_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_iter:
+(LOW         ) IterTimerHook                      
+ -------------------- 
+after_val_epoch:
+(VERY_LOW    ) CusTextLoggerHook                  
+ -------------------- 
+after_run:
+(VERY_LOW    ) CusTextLoggerHook                  
+ -------------------- 
+2026-11-12 10:13:31,651 - mmgd - INFO - workflow: [('train', 1)], max: 76 epochs
+2026-11-12 10:13:31,651 - mmgd - INFO - Checkpoints will be saved to /inspire/hdd/global_user/czxs25110026/laliwang/SoMA/work_dirs/cloth_lift_stage2 by HardDiskBackend.
